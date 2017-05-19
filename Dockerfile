@@ -68,6 +68,6 @@ RUN PHP_PREFIX=/usr \
         --with-pdo-mysql=mysqlnd \
         --with-gd-dir=/usr \
     && make  \
-    && make test \
+    # && make test \
     && make install
 
