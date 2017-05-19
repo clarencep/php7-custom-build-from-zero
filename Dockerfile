@@ -35,6 +35,8 @@ RUN wget -O /usr/local/src/epel-release-6-8.noarch.rpm http://dl.fedoraproject.o
 #    && make \
 #    && make install
 
+RUN yum install -y readline-devel
+
 ENV PHP_PREFIX /usr
 ENV PHP_CONFIG_FILE_PATH /etc
 
@@ -70,12 +72,12 @@ RUN cd /usr/local/src/php-$PHP_VERSION \
         --with-mysql=mysqlnd \
         --with-mysqli=mysqlnd \
         --with-pdo-mysql=mysqlnd \
-        --with-gd=/usr \
+        --with-gd \
         --with-jpeg-dir=/usr \
         --with-png-dir=/usr \
         --with-readline \
-        --with-imap \
-        --with-ldap \
+        # --with-imap \
+        # --with-ldap \
     && make  \
     # && make test \
     && make install 
