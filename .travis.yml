@@ -13,9 +13,9 @@ before_script:
   - python --version
   - docker version
   - docker ps -a
-  - docker build -t clarencep/php7:$TRAVIS_BRANCH .
+  - docker build -t clarencep/php7-custom-build-from-zero:$TRAVIS_BRANCH .
   - docker images
   - docker ps -a
 
 script:
-  - for tag in latest ubuntu centos6 centos7; do docker run -it --rm clarencep/php7:$tag sh -c "php -v && php -m && cat /etc/*release*"; done;
+  - docker run -it --rm clarencep/php7-custom-build-from-zero:$TRAVIS_BRANCH sh -cxe "php -v && php -m && php -i"
