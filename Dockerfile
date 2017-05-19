@@ -35,9 +35,10 @@ RUN wget -O /usr/local/src/epel-release-6-8.noarch.rpm http://dl.fedoraproject.o
 #    && make \
 #    && make install
 
-RUN PHP_PREFIX=/usr \
-    PHP_CONFIG_FILE_PATH=/etc/lib \
-    cd /usr/local/src/php-$PHP_VERSION \
+ENV PHP_PREFIX /usr
+ENV PHP_CONFIG_FILE_PATH /etc
+
+RUN cd /usr/local/src/php-$PHP_VERSION \
     && ./configure \
         --prefix=$PHP_PREFIX \
         --with-config-file-path=$PHP_CONFIG_FILE_PATH \
@@ -54,20 +55,35 @@ RUN PHP_PREFIX=/usr \
         --enable-sysvshm \
         --enable-wddx \
         --enable-exif \
+        --enable-shmop \
+        --enable-soap \
+        --enable-sockets \
         --with-curl \
         --with-mcrypt \
-        --with-mhash \
         --with-iconv=/usr/local/libiconv \
         --with-gmp \
         --with-openssl \
+        --with-readline \
         --with-zlib=/usr \
         --with-bz2=/usr \
         --with-gettext=/usr \
         --with-mysql=mysqlnd \
         --with-mysqli=mysqlnd \
         --with-pdo-mysql=mysqlnd \
-        --with-gd-dir=/usr \
+        --with-gd=/usr \
+        --with-jpeg-dir=/usr \
+        --with-png-dir=/usr \
+        --with-readline \
+        --with-imap \
+        --with-ldap \
     && make  \
     # && make test \
-    && make install
+    && make install 
+
+RUN PECL=$PHP_PREFIX/bin/pecl \
+    for x in redis imagick igbinary inotify intl memcache; do \
+        $PECL install $x; \
+        echo "exstension=$x.so" > /data/server/etc/php-7.1.5/php.d/$x.ini; \
+    done;
+
 
