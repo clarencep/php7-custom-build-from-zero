@@ -1,0 +1,21 @@
+branches:
+  only:
+    - master
+
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+before_script:
+  - python --version
+  - docker version
+  - docker ps -a
+  - docker build -t clarencep/php7:$TRAVIS_BRANCH .
+  - docker images
+  - docker ps -a
+
+script:
+  - for tag in latest ubuntu centos6 centos7; do docker run -it --rm clarencep/php7:$tag sh -c "php -v && php -m && cat /etc/*release*"; done;
