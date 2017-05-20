@@ -50,7 +50,7 @@ RUN cd /usr/local/src/php-$PHP_VERSION \
         --prefix=$PHP_PREFIX \
         --with-config-file-path=$PHP_CONFIG_FILE_PATH \
         --with-config-file-scan-dir=$PHP_CONFIG_FILE_PATH/php.d \
-        --with-apxs2=/usr/sbin/apxs \
+        --with-apxs2=/usr/bin/apxs \
         --enable-opcache \
         --enable-mbstring \
         --enable-zip \
