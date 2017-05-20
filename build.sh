@@ -1,6 +1,6 @@
 #!/bin/sh -xe
 
-IMAGE_NAME=php7-custom-build-from-zero
+IMAGE_NAME=lap7-custom-build-from-zero
 
 docker build -t clarencep/$IMAGE_NAME .
 

@@ -1,4 +1,4 @@
-FROM centos:6
+FROM centos:7
 
 RUN mkdir -p /usr/local/src
 RUN yum install -y wget gcc make automake autoconf
@@ -37,6 +37,11 @@ RUN wget -O /usr/local/src/epel-release-6-8.noarch.rpm http://dl.fedoraproject.o
 
 RUN yum install -y readline-devel
 
+RUN yum install -y libxslt libxslt-devel
+
+# for apache
+RUN yum install -y httpd httpd-devel
+
 ENV PHP_PREFIX /usr
 ENV PHP_CONFIG_FILE_PATH /etc
 
@@ -45,6 +50,7 @@ RUN cd /usr/local/src/php-$PHP_VERSION \
         --prefix=$PHP_PREFIX \
         --with-config-file-path=$PHP_CONFIG_FILE_PATH \
         --with-config-file-scan-dir=$PHP_CONFIG_FILE_PATH/php.d \
+        --with-apxs2=/usr/sbin/apxs \
         --enable-opcache \
         --enable-mbstring \
         --enable-zip \
@@ -75,6 +81,8 @@ RUN cd /usr/local/src/php-$PHP_VERSION \
         --with-gd \
         --with-jpeg-dir=/usr \
         --with-png-dir=/usr \
+        --with-xmlrpc \
+        --with-xsl \
         --with-readline \
         # --with-imap \
         # --with-ldap \
@@ -82,10 +90,26 @@ RUN cd /usr/local/src/php-$PHP_VERSION \
     # && make test \
     && make install 
 
-RUN PECL=$PHP_PREFIX/bin/pecl \
-    for x in redis imagick igbinary inotify intl memcache; do \
-        $PECL install $x; \
-        echo "exstension=$x.so" > /data/server/etc/php-7.1.5/php.d/$x.ini; \
-    done;
+RUN mkdir -p $PHP_CONFIG_FILE_PATH/php.d
+RUN cp /usr/local/src/php-$PHP_VERSION/php.ini-production $PHP_CONFIG_FILE_PATH/php.ini
 
+ENV PECL $PHP_PREFIX/bin/pecl
+RUN $PECL install redis && echo "exstension=redis.so" > $PHP_CONFIG_FILE_PATH/php.d/redis.ini
+RUN $PECL install igbinary && echo "exstension=igbinary.so" > $PHP_CONFIG_FILE_PATH/php.d/igbinary.ini
+RUN $PECL install inotify && echo "exstension=inotify.so" > $PHP_CONFIG_FILE_PATH/php.d/inotify.ini
 
+RUN yum install -y ImageMagick ImageMagick-devel
+RUN $PECL install imagick && echo "exstension=imagick.so" > $PHP_CONFIG_FILE_PATH/php.d/imagick.ini
+
+# # !FAILED: /usr/local/src/memcached-3.0.3/php_libmemcached_compat.h:31: error: expected '=', ',', ';', 'asm' or '__attribute__' before 'php_memcached_instance_st'
+# RUN yum install -y libmemcached libmemcached-devel
+# RUN wget -O /usr/local/src/memcached-3.0.3.tgz https://pecl.php.net/get/memcached-3.0.3.tgz \
+#     && tar xzf /usr/local/src/memcached-3.0.3.tgz -C /usr/local/src \
+#     && cd /usr/local/src/memcached-3.0.3 \
+#     && $PHP_PREFIX/bin/phpize \
+#     && ./configure --with-php-config=$PHP_PREFIX/bin/php-config --with-libmemcached-dir=/usr/local/libmemcached/ --disable-memcached-sasl \
+#     && make \
+#     && make install \
+#     && echo "exstension=memcached.so" > $PHP_CONFIG_FILE_PATH/php.d/memcached.ini
+
+RUN php -v && php -m | sort
